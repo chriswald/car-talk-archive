@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "PodcastMetadataParse": {
+      "commandName": "Project",
+      "commandLineArgs": "results.html"
+    }
+  }
+}
