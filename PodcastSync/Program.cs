@@ -23,13 +23,20 @@ namespace PodcastSync
 			XmlDocument doc = new XmlDocument();
 			doc.LoadXml(rss);
 
-			XmlNode root = doc.SelectSingleNode("rss");
+			XmlNode? root = doc.SelectSingleNode("rss");
 
-			XmlNode channel = root.SelectSingleNode("channel");
-			
-			foreach (XmlNode item in channel.SelectNodes("item"))
+			XmlNode? channel = root?.SelectSingleNode("channel");
+			if (channel == null) { return; }
+
+			XmlNodeList? items = channel.SelectNodes("item");
+			if (items == null) { return; }
+
+			foreach (XmlNode item in items)
 			{
-				XmlNode pubDateNode = item.SelectSingleNode("pubDate");
+				XmlNode? pubDateNode = item.SelectSingleNode("pubDate");
+
+				if (pubDateNode == null) { continue; }
+
 				DateTime pubDate = DateTime.Parse(pubDateNode.InnerText);
 
 				string episodeFolder = Path.Combine(baseOutDir, pubDate.ToString("yyyy-MM-dd"));
@@ -40,27 +47,37 @@ namespace PodcastSync
 
 				Directory.CreateDirectory(episodeFolder);
 
+				XmlNode? titleNode = item.SelectSingleNode("title");
+				XmlNode? teaserNode = item.SelectSingleNode("description");
+				XmlNode? enclosureNode = item.SelectSingleNode("enclosure");
+
+				if (titleNode == null || teaserNode == null || enclosureNode == null)
+				{
+					continue;
+				}
+
 				// Get the publish date
 				File.WriteAllText(Path.Combine(episodeFolder, "date.txt"), pubDate.ToString("yyyy-MM-dd"));
 
 				// Get the episode title
-				XmlNode titleNode = item.SelectSingleNode("title");
+				
 				string title = titleNode.InnerText;
 				title = regex.Replace(title, " ");
 				File.WriteAllText(Path.Combine(episodeFolder, "title.txt"), title);
 
 				// Get the teaser
-				XmlNode teaserNode = item.SelectSingleNode("description");
 				string teaser = teaserNode.InnerText;
 				teaser = regex.Replace(teaser, " ");
 				File.WriteAllText(Path.Combine(episodeFolder, "teaser.txt"), teaser);
 
 				// Get the episode URL
-				XmlNode enclosureNode = item.SelectSingleNode("enclosure");
-				XmlNode urlAttr = enclosureNode.Attributes.GetNamedItem("url");
-				string url = urlAttr.Value;
-				File.WriteAllText(Path.Combine(episodeFolder, "url.txt"), url);
-				DownloadFile(url, episodeFolder);
+				XmlNode? urlAttr = enclosureNode.Attributes?.GetNamedItem("url");
+				string? url = urlAttr?.Value;
+				if (!string.IsNullOrEmpty(url))
+				{
+					File.WriteAllText(Path.Combine(episodeFolder, "url.txt"), url);
+					DownloadFile(url, episodeFolder);
+				}
 			}
 		}
 
