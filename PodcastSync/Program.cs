@@ -15,7 +15,7 @@ namespace PodcastSync
 			string baseOutDir = Directory.GetCurrentDirectory();
 			if (args.Length > 0)
 			{
-				baseOutDir = args[1];
+				baseOutDir = args[0];
 			}
 
 			string rss = PodcastRss("https://feeds.npr.org/510208/podcast.xml");
