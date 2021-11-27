@@ -49,6 +49,17 @@ foreach ($podcasts as $key => $value)
             $teaser = file_get_contents($episodeDir . DIRECTORY_SEPARATOR . "teaser.txt");
             $teaser = htmlspecialchars($teaser, ENT_XML1);
 
+            if (file_exists($episodeDir . DIRECTORY_SEPARATOR . "duration.txt"))
+            {
+                $duration = file_get_contents($episodeDir . DIRECTORY_SEPARATOR . "duration.txt");
+            }
+            else
+            {
+                $duration = 3376;
+            }
+
+            $episodeUrl = "https://podcast.chriswald.com/episode?p=" . $pubDateFromFile;
+
             echo "<item>\n";
             echo "<title>" . $title . "</title>\n";
             echo "<description>" . $teaser . "</description>\n";
@@ -56,15 +67,13 @@ foreach ($podcasts as $key => $value)
             echo "<itunes:author>NPR</itunes:author>\n";
             echo "<itunes:explicit>no</itunes:explicit>\n";
             echo "<itunes:episodeType>full</itunes:episodeType>\n";
-            echo "<itunes:duration>3367</itunes:duration>\n";
-            echo "<enclosure url=\"https://podcast.chriswald.com/episode?p=" . $pubDateFromFile . "\" length=\"53032053\" type=\"audio/mpeg\"/>\n";
+            echo "<itunes:duration>" . $duration . "</itunes:duration>\n";
+            echo "<enclosure url=\"" . $episodeUrl . "\" length=\"53032053\" type=\"audio/mpeg\"/>\n";
             echo "<pubDate>" . $pubDateString . "</pubDate>\n";
             echo "</item>\n";
         }
     }
 }
-
-
 
 ?>
     </channel>
