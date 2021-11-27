@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Xml;
@@ -22,6 +24,9 @@ namespace PodcastSync
 
 			XmlDocument doc = new XmlDocument();
 			doc.LoadXml(rss);
+
+			XmlNamespaceManager nsMgr = new XmlNamespaceManager(doc.NameTable);
+			nsMgr.AddNamespace("itunes", "https://www.itunes.com/dtds/podcast-1.0.dtd");
 
 			XmlNode? root = doc.SelectSingleNode("rss");
 
@@ -50,6 +55,8 @@ namespace PodcastSync
 				XmlNode? titleNode = item.SelectSingleNode("title");
 				XmlNode? teaserNode = item.SelectSingleNode("description");
 				XmlNode? enclosureNode = item.SelectSingleNode("enclosure");
+				XmlNode? durationNode = new List<XmlNode>(item.ChildNodes.Cast<XmlNode>())
+					.Find(node => node.Name.Contains("itunes:duration", StringComparison.OrdinalIgnoreCase));
 
 				if (titleNode == null || teaserNode == null || enclosureNode == null)
 				{
@@ -78,6 +85,12 @@ namespace PodcastSync
 					File.WriteAllText(Path.Combine(episodeFolder, "url.txt"), url);
 					DownloadFile(url, episodeFolder);
 				}
+
+				if (durationNode != null)
+                {
+					string duration = durationNode.InnerText;
+					File.WriteAllText(Path.Combine(episodeFolder, "duration.txt"), duration);
+                }
 			}
 		}
 
