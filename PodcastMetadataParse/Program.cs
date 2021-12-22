@@ -85,6 +85,26 @@ namespace PodcastMetadataParse
 					DownloadFile(url, time);
 				}
 			}
+
+			XmlNode? durationNode = itemInfo.SelectSingleNode("article/div/div/div/time");
+			if (durationNode != null)
+            {
+				string? duration = durationNode.Attributes?.GetNamedItem("datetime")?.Value;
+				if (!string.IsNullOrEmpty(duration))
+                {
+					Match minutesMatch = new Regex(@"P(\d{1,2})M").Match(duration);
+					string minutesString = minutesMatch.Success ? minutesMatch.Groups[1].Value : "0";
+					Match secondsMatch = new Regex(@",(\d{1,2})S").Match(duration);
+					string secondsString = secondsMatch.Success ? secondsMatch.Groups[1].Value : "0";
+
+					int minutes = int.Parse(minutesString);
+					int seconds = int.Parse(secondsString);
+
+					int totalDuration = (minutes * 60) + seconds;
+
+					File.WriteAllText(Path.Combine(time, "duration.txt"), totalDuration.ToString());
+				}
+            }
 		}
 
 		static void DownloadFile(string url, string outDir)
