@@ -49,12 +49,4 @@ else
     header("HTTP/1.0 404 Not Found");
 }
 
-function str_ends_with( $haystack, $needle ) {
-    $length = strlen( $needle );
-    if( !$length ) {
-        return true;
-    }
-    return substr( $haystack, -$length ) === $needle;
-}
-
 ?>
